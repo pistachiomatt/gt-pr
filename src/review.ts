@@ -208,7 +208,7 @@ export const codeReview = async (
         if (patchLines == null) {
           continue
         }
-        const hunks = parsePatch(patch)
+        const hunks = parsePatch(fileContent, patch)
         if (hunks == null) {
           continue
         }
@@ -411,7 +411,7 @@ ${SHORT_SUMMARY_END_TAG}
 - Invite the bot into a review comment chain by tagging \`@openai\` in a reply.
 
 ### Code suggestions
-- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned. 
+- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned.
 - You can edit the comment made by the bot and manually tweak the suggestion if it is slightly off.
 
 ### Ignoring further reviews
@@ -752,7 +752,9 @@ const patchStartEndLine = (
 }
 
 const parsePatch = (
-  patch: string
+  fileContent: string,
+  patch: string,
+  contextLines: number = 20 // Default value for contextLines is 3
 ): {oldHunk: string; newHunk: string} | null => {
   const hunkInfo = patchStartEndLine(patch)
   if (hunkInfo == null) {
@@ -772,6 +774,9 @@ const parsePatch = (
     lines.pop()
   }
 
+  // Get the fileContent lines array for extracting additional context lines
+  const fileContentLines = fileContent.split('\n')
+
   for (const line of lines) {
     if (line.startsWith('-')) {
       oldHunkLines.push(`${line.substring(1)}`)
@@ -784,6 +789,24 @@ const parsePatch = (
       newHunkLines.push(`${newLine}: ${line}`)
       // old_line++
       newLine++
+    }
+  }
+
+  // Add context lines before and after the hunk
+  for (let i = 0; i < contextLines; i++) {
+    const beforeLineIndex = hunkInfo.newHunk.startLine - i - 1
+    const afterLineIndex = hunkInfo.newHunk.endLine + i
+
+    if (beforeLineIndex >= 0) {
+      newHunkLines.unshift(
+        `${beforeLineIndex + 1}: ${fileContentLines[beforeLineIndex]}`
+      )
+    }
+
+    if (afterLineIndex < fileContentLines.length) {
+      newHunkLines.push(
+        `${afterLineIndex + 1}: ${fileContentLines[afterLineIndex]}`
+      )
     }
   }
 
