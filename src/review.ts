@@ -417,6 +417,8 @@ ${SHORT_SUMMARY_END_TAG}
 ### Ignoring further reviews
 - Type \`@openai: ignore\` anywhere in the PR description to ignore further reviews from the bot.
 
+version: v1.0
+
 ---
 
 ${
