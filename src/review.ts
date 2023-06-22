@@ -756,7 +756,7 @@ const patchStartEndLine = (
 const parsePatch = (
   fileContent: string,
   patch: string,
-  contextLines: number = 20 // Default value for contextLines is 3
+  contextLines: number = 100 // Default value for contextLines is 3
 ): {oldHunk: string; newHunk: string} | null => {
   const hunkInfo = patchStartEndLine(patch)
   if (hunkInfo == null) {
@@ -800,15 +800,11 @@ const parsePatch = (
     const afterLineIndex = hunkInfo.newHunk.endLine + i
 
     if (beforeLineIndex >= 0) {
-      newHunkLines.unshift(
-        `${beforeLineIndex + 1}: ${fileContentLines[beforeLineIndex]}`
-      )
+      newHunkLines.unshift(`CTX: ${fileContentLines[beforeLineIndex]}`)
     }
 
     if (afterLineIndex < fileContentLines.length) {
-      newHunkLines.push(
-        `${afterLineIndex + 1}: ${fileContentLines[afterLineIndex]}`
-      )
+      newHunkLines.push(`CTX: ${fileContentLines[afterLineIndex]}`)
     }
   }
 
