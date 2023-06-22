@@ -9,6 +9,7 @@ const RetryAndThrottlingOctokit = Octokit.plugin(throttling, retry)
 export const octokit = new RetryAndThrottlingOctokit({
   auth: `token ${token}`,
   throttle: {
+    // @ts-ignore
     onRateLimit: (
       retryAfter: number,
       options: any,
