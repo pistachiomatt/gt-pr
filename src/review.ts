@@ -756,60 +756,35 @@ const patchStartEndLine = (
 const parsePatch = (
   fileContent: string,
   patch: string,
-  contextLines: number = 20 // Default value for contextLines is 3
+  contextLines = 20
 ): {oldHunk: string; newHunk: string} | null => {
   const hunkInfo = patchStartEndLine(patch)
-  if (hunkInfo == null) {
-    return null
-  }
+  if (!hunkInfo) return null
 
   const oldHunkLines: string[] = []
   const newHunkLines: string[] = []
-
-  // let old_line = hunkInfo.old_hunk.start_line
   let newLine = hunkInfo.newHunk.startLine
 
-  const lines = patch.split('\n').slice(1) // Skip the @@ line
-
-  // Remove the last line if it's empty
-  if (lines[lines.length - 1] === '') {
-    lines.pop()
-  }
-
-  // Get the fileContent lines array for extracting additional context lines
+  const lines = patch.split('\n').slice(1, -1)
   const fileContentLines = fileContent.split('\n')
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
     if (line.startsWith('-')) {
-      oldHunkLines.push(`${line.substring(1)}`)
-      // old_line++
-    } else if (line.startsWith('+')) {
-      newHunkLines.push(`${newLine}: ${line.substring(1)}`)
-      newLine++
+      oldHunkLines.push(line.substring(1))
     } else {
-      oldHunkLines.push(`${line}`)
-      newHunkLines.push(`${newLine}: ${line}`)
-      // old_line++
-      newLine++
+      const newLineContent = `${newLine++}: ${line.startsWith('+') ? line.substring(1) : line}`
+      newHunkLines.push(newLineContent)
+      if (!line.startsWith('-')) oldHunkLines.push(line)
     }
   }
 
-  // Add context lines before and after the hunk
   for (let i = 0; i < contextLines; i++) {
     const beforeLineIndex = hunkInfo.newHunk.startLine - i - 1
     const afterLineIndex = hunkInfo.newHunk.endLine + i
 
-    if (beforeLineIndex >= 0) {
-      newHunkLines.unshift(
-        `${beforeLineIndex + 1}: ${fileContentLines[beforeLineIndex]}`
-      )
-    }
-
-    if (afterLineIndex < fileContentLines.length) {
-      newHunkLines.push(
-        `${afterLineIndex + 1}: ${fileContentLines[afterLineIndex]}`
-      )
-    }
+    if (beforeLineIndex >= 0) newHunkLines.unshift(`${beforeLineIndex + 1}: ${fileContentLines[beforeLineIndex]}`)
+    if (afterLineIndex < fileContentLines.length) newHunkLines.push(`${afterLineIndex + 1}: ${fileContentLines[afterLineIndex]}`)
   }
 
   return {
