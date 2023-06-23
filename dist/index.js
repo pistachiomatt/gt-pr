@@ -7427,7 +7427,7 @@ const patchStartEndLine = (patch) => {
         return null;
     }
 };
-const parsePatch = (fileContent, patch, contextLines = 100 // Default value for contextLines is 3
+const parsePatch = (fileContent, patch, contextLines = 20 // Default value for contextLines is 3
 ) => {
     const hunkInfo = patchStartEndLine(patch);
     if (hunkInfo == null) {

@@ -756,7 +756,7 @@ const patchStartEndLine = (
 const parsePatch = (
   fileContent: string,
   patch: string,
-  contextLines: number = 100 // Default value for contextLines is 3
+  contextLines: number = 20 // Default value for contextLines is 3
 ): {oldHunk: string; newHunk: string} | null => {
   const hunkInfo = patchStartEndLine(patch)
   if (hunkInfo == null) {
