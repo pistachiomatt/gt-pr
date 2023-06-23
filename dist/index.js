@@ -6116,6 +6116,10 @@ class TokenLimits {
             this.maxTokens = 8000;
             this.responseTokens = 2000;
         }
+        else if (model === 'gpt-3.5-turbo-16k') {
+            this.maxTokens = 16000;
+            this.responseTokens = 2000;
+        }
         else {
             this.maxTokens = 4000;
             this.responseTokens = 1000;
@@ -6150,7 +6154,7 @@ class Options {
     lightTokenLimits;
     heavyTokenLimits;
     apiBaseUrl;
-    constructor(debug, disableReview, disableReleaseNotes, maxFiles = '0', reviewSimpleChanges = false, reviewCommentLGTM = false, pathFilters = null, systemMessage = '', openaiLightModel = 'gpt-3.5-turbo', openaiHeavyModel = 'gpt-3.5-turbo', openaiModelTemperature = '0.0', openaiRetries = '3', openaiTimeoutMS = '120000', openaiConcurrencyLimit = '4', apiBaseUrl = 'https://api.openai.com/v1') {
+    constructor(debug, disableReview, disableReleaseNotes, maxFiles = '0', reviewSimpleChanges = false, reviewCommentLGTM = false, pathFilters = null, systemMessage = '', openaiLightModel = 'gpt-3.5-turbo-16k', openaiHeavyModel = 'gpt-3.5-turbo-16k', openaiModelTemperature = '0.0', openaiRetries = '3', openaiTimeoutMS = '120000', openaiConcurrencyLimit = '4', apiBaseUrl = 'https://api.openai.com/v1') {
         this.debug = debug;
         this.disableReview = disableReview;
         this.disableReleaseNotes = disableReleaseNotes;
@@ -6239,7 +6243,7 @@ class PathFilter {
 class OpenAIOptions {
     model;
     tokenLimits;
-    constructor(model = 'gpt-3.5-turbo', tokenLimits = null) {
+    constructor(model = 'gpt-3.5-turbo-16k', tokenLimits = null) {
         this.model = model;
         if (tokenLimits != null) {
             this.tokenLimits = tokenLimits;
@@ -7300,6 +7304,11 @@ ${commentChain}
 ---end_change_section---
 `;
             }
+            if (patchesPacked === 0) {
+                (0,core.info)(`patch too large, skipping`);
+                reviewsFailed.push(`${filename} (patch too large)`);
+                return;
+            }
             // perform review
             try {
                 const [response] = await heavyBot.chat(prompts.renderReviewFileDiff(ins), {});
@@ -7427,7 +7436,7 @@ const patchStartEndLine = (patch) => {
         return null;
     }
 };
-const parsePatch = (fileContent, patch, contextLines = 20 // Default value for contextLines is 3
+const parsePatch = (fileContent, patch, contextLines = 35 // Default value for contextLines is 3
 ) => {
     const hunkInfo = patchStartEndLine(patch);
     if (hunkInfo == null) {

@@ -583,6 +583,12 @@ ${commentChain}
 `
       }
 
+      if (patchesPacked === 0) {
+        info(`patch too large, skipping`)
+        reviewsFailed.push(`${filename} (patch too large)`)
+        return
+      }
+
       // perform review
       try {
         const [response] = await heavyBot.chat(
@@ -756,7 +762,7 @@ const patchStartEndLine = (
 const parsePatch = (
   fileContent: string,
   patch: string,
-  contextLines: number = 20 // Default value for contextLines is 3
+  contextLines: number = 35 // Default value for contextLines is 3
 ): {oldHunk: string; newHunk: string} | null => {
   const hunkInfo = patchStartEndLine(patch)
   if (hunkInfo == null) {
