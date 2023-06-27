@@ -806,7 +806,17 @@ const parsePatch = (
     const afterLineIndex = hunkInfo.newHunk.endLine + i
 
     if (beforeLineIndex >= 0) {
-      newHunkLines.unshift(`CTX: ${fileContentLines[beforeLineIndex]}`)
+      const beforeLine = fileContentLines[beforeLineIndex]
+
+      // Sometimes the last CTX line is the same as the first line of the hunk
+      if (
+        i === contextLines - 1 &&
+        beforeLine === fileContentLines[hunkInfo.newHunk.startLine]
+      ) {
+        continue
+      }
+
+      newHunkLines.unshift(`CTX: ${beforeLine}`)
     }
 
     if (afterLineIndex < fileContentLines.length) {
